@@ -1,0 +1,35 @@
+name: Scan specific site with Dastardly and Publish Report
+
+on:
+  # Uruchomienie na push do gałęzi main
+  push:
+    branches:
+      - main
+  # Uruchomienie ręczne z interfejsu GitHub Actions
+  workflow_dispatch:
+
+jobs:
+  scan-with-dastardly:
+    name: Run Dastardly Security Scan
+    runs-on: ubuntu-latest
+
+    permissions:
+      checks: write # To uprawnienie pozwala na publikację raportu
+      contents: read # Standardowe uprawnienie
+    
+    steps:
+      # Krok 1: Właściwe skanowanie
+      - name: Run Dastardly Scan on Target URL
+        uses: PortSwigger/dastardly-github-action@main
+        with:
+          # WAŻNE: ZMIEŃ ADRES NA TEN, KTÓRY CHCESZ SKANOWAĆ
+          target-url: 'https://wsb.edu.pl/' 			# <----------------------	TUTAJ MIEJSCE NA URL 
+        
+      # Krok 2: Publikacja raportu 
+      - name: Publish Dastardly Scan Report
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          check_name: 'Dastardly Scan Report'
+          report_paths: '**/dastardly-report.xml' 
+          require_tests: true
